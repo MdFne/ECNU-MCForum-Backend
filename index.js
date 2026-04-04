@@ -1,14 +1,16 @@
-// 1. 引入express
+// 引入express
 const express = require('express');
-// 2. 引入mongoose
+// 引入mongoose
 const mongoose = require('mongoose');
-// 3. 引入cors
+// 引入cors
 const cors = require('cors');
+// 引入 Swagger 配置
+const setupSwagger = require('./swagger.js');
 
-// 4. 创建应用实例
+// 创建应用实例
 const app = express();
 const port = 3000;
-// 5. 配置环境变量
+// 配置环境变量
 require('dotenv').config();
 
 // 引入错误处理中间件
@@ -19,6 +21,9 @@ const authRoutes = require('./routes/auth');
 
 // 解析 JSON 请求体
 app.use(express.json());
+
+// 配置 Swagger
+setupSwagger(app);
 
 // 允许跨域请求
 app.use(cors({
