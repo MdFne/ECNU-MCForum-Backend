@@ -58,10 +58,10 @@ const getServerLast10DayHeat = asyncHandler(async (req, res) => {
 });
 
 const getOverviewStats = asyncHandler(async (req, res) => {
-    const servers = await Server.find({ isActive: true });
+    const servers = await Server.find({});
 
     const totalServers = servers.length;
-    const onlineServers = servers.filter(server => server.ping !== null).length;
+    const onlineServers = servers.filter(server => server.isActive).length;
     const totalPlayers = servers.reduce((sum, server) => sum + (server.currentPlayers || 0), 0);
 
     const data = {

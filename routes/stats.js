@@ -91,7 +91,6 @@ router.get('/servers', statsController.getServers);
  */
 router.get('/servers/:id/realtime', statsController.getServerRealTimeStats);
 
-
 // 服务器最近10天热度
 /**
  * @swagger
@@ -230,6 +229,45 @@ router.get('/overview', statsController.getOverviewStats);
  */
 router.put('/servers/:id', statsController.updateServer);
 
+// 刷新所有服务器状态
+/**
+ * @swagger
+ * /api/stats/servers/refresh-all:
+ *   post:
+ *     summary: 刷新所有服务器状态
+ *     description: 批量刷新所有服务器的在线状态、玩家数量、版本、延迟等实时数据
+ *     responses:
+ *       200:
+ *         description: 所有服务器状态刷新成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: 所有服务器状态刷新成功
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                       description: 总服务器数量
+ *                       example: 5
+ *                     successCount:
+ *                       type: integer
+ *                       description: 刷新成功的服务器数量
+ *                       example: 5
+ *                     failedCount:
+ *                       type: integer
+ *                       description: 刷新失败的服务器数量
+ *                       example: 0
+ *       500:
+ *         description: 服务器内部错误
+ */
 router.post('/servers/refresh-all', statsController.refreshAllServersStats);
 
 module.exports = router;
