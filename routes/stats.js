@@ -91,76 +91,15 @@ router.get('/servers', statsController.getServers);
  */
 router.get('/servers/:id/realtime', statsController.getServerRealTimeStats);
 
-// 服务器历史数据
-/**
- * @swagger
- * /api/stats/servers/{id}/history:
- *   get:
- *     summary: 获取服务器历史数据
- *     description: 获取指定服务器的历史统计数据，默认返回最近30天的数据
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: 服务器ID（MongoDB ObjectId）
- *       - in: query
- *         name: days
- *         schema:
- *           type: integer
- *           default: 30
- *         description: 查询的天数
- *     responses:
- *       200:
- *         description: 成功获取服务器历史数据
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       _id:
- *                         type: string
- *                       server:
- *                         type: string
- *                       onlineStatus:
- *                         type: boolean
- *                       currentPlayers:
- *                         type: number
- *                       maxPlayers:
- *                         type: number
- *                       version:
- *                         type: string
- *                       latency:
- *                         type: number
- *                       recordedAt:
- *                         type: string
- *                         format: date-time
- *       400:
- *         description: 无效的服务器ID
- *       404:
- *         description: 服务器不存在
- *       500:
- *         description: 服务器内部错误
- */
-router.get('/servers/:id/history', statsController.getServerHistoryStats);
 
-// 服务器月度热度
+
+// 服务器最近10天热度
 /**
  * @swagger
- * /api/stats/servers/{id}/monthly-heat:
+ * /api/stats/servers/{id}/last10day-heat:
  *   get:
- *     summary: 获取服务器月度热度
- *     description: 获取指定服务器的月度热度数据，用于绘制热度趋势图
+ *     summary: 获取服务器最近10天热度
+ *     description: 获取指定服务器的最近10天热度数据，用于绘制热度趋势图
  *     parameters:
  *       - in: path
  *         name: id
@@ -168,15 +107,9 @@ router.get('/servers/:id/history', statsController.getServerHistoryStats);
  *         schema:
  *           type: string
  *         description: 服务器ID（MongoDB ObjectId）
- *       - in: query
- *         name: months
- *         schema:
- *           type: integer
- *           default: 12
- *         description: 查询的月数
  *     responses:
  *       200:
- *         description: 成功获取服务器月度热度
+ *         description: 成功获取服务器最近10天热度
  *         content:
  *           application/json:
  *             schema:
@@ -190,8 +123,8 @@ router.get('/servers/:id/history', statsController.getServerHistoryStats);
  *                   type: array
  *                   items:
  *                     type: number
- *                   description: 月度平均玩家数量数组
- *                   example: [45, 52, 38, 61, 55, 48, 67, 72, 58, 63, 70, 65]
+ *                   description: 最近10天热度数据数组
+ *                   example: [20, 25, 30, 28, 32, 26, 29, 35, 33, 30]
  *       400:
  *         description: 无效的服务器ID
  *       404:
@@ -199,7 +132,7 @@ router.get('/servers/:id/history', statsController.getServerHistoryStats);
  *       500:
  *         description: 服务器内部错误
  */
-router.get('/servers/:id/monthly-heat', statsController.getServerMonthlyHeat);
+router.get('/servers/:id/last10day-heat', statsController.getServerLast10DayHeat);
 
 // 概览统计
 /**
@@ -236,5 +169,66 @@ router.get('/servers/:id/monthly-heat', statsController.getServerMonthlyHeat);
  *         description: 服务器内部错误
  */
 router.get('/overview', statsController.getOverviewStats);
+
+// 更新服务器数据
+/**
+ * @swagger
+ * /api/stats/servers/{id}:
+ *   put:
+ *     summary: 更新服务器数据
+ *     description: 根据API响应数据更新服务器信息
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 服务器ID（MongoDB ObjectId）
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currentPlayers:
+ *                 type: number
+ *               maxPlayers:
+ *                 type: number
+ *               last_updated_str:
+ *                 type: string
+ *               last_updated:
+ *                 type: number
+ *               motd:
+ *                 type: string
+ *               ping:
+ *                 type: number
+ *               today_max:
+ *                 type: number
+ *               today_min:
+ *                 type: number
+ *               today_avg:
+ *                 type: number
+ *               history_max:
+ *                 type: number
+ *               total_queries:
+ *                 type: number
+ *               created_at:
+ *                 type: number
+ *               created_at_str:
+ *                 type: string
+ *               thumbnail:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 成功更新服务器数据
+ *       400:
+ *         description: 无效的服务器ID
+ *       404:
+ *         description: 服务器不存在
+ *       500:
+ *         description: 服务器内部错误
+ */
+router.put('/servers/:id', statsController.updateServer);
 
 module.exports = router;

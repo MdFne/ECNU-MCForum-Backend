@@ -62,6 +62,65 @@ const connectDB = async () => {
   }
 };
 
+// 定时更新服务器数据
+const scheduleServerUpdate = async () => {
+  try {
+    const Server = require('./models/Server');
+    const servers = await Server.find({ isActive: true });
+
+    for (const server of servers) {
+      try {
+        // 提取ip地址（去除端口号）
+        const ip = server.address.split(':')[0];
+        const apiResponse = await fetch(`https://www.minecraftservers.cn/api/query?ip=${ip}`);
+
+        if (apiResponse.ok) {
+          const apiData = await apiResponse.json();
+
+          if (apiData.success && apiData.data) {
+            // 更新last10dayHeat数据
+            let updatedLast10dayHeat = [...(server.last10dayHeat || Array(10).fill(0))];
+            // 移除最左边的元素，添加新的today_max值到最右边
+            updatedLast10dayHeat.shift();
+            updatedLast10dayHeat.push(apiData.data.today_max);
+
+            // 更新服务器数据
+            const updateData = {
+              currentPlayers: apiData.data.p,
+              maxPlayers: apiData.data.mp,
+              last_updated_str: apiData.data.last_updated_str,
+              last_updated: apiData.data.last_updated,
+              motd: apiData.data.motd,
+              ping: apiData.data.ping,
+              today_max: apiData.data.today_max,
+              today_min: apiData.data.today_min,
+              today_avg: apiData.data.today_avg,
+              history_max: apiData.data.history_max,
+              total_queries: apiData.data.total_queries,
+              created_at: apiData.data.created_at,
+              created_at_str: apiData.data.created_at_str,
+              last10dayHeat: updatedLast10dayHeat,
+              updatedAt: new Date()
+            };
+
+            // 如果有logo，也更新
+            if (apiData.data.logo) {
+              updateData.thumbnail = apiData.data.logo;
+            }
+
+            await Server.findByIdAndUpdate(server._id, updateData);
+            console.log(`更新服务器 ${server.title} 数据成功`);
+          }
+        }
+      } catch (error) {
+        console.error(`更新服务器 ${server.title} 数据失败:`, error);
+      }
+    }
+  } catch (error) {
+    console.error('定时更新服务器数据失败:', error);
+  }
+};
+
 // 启动服务器
 const startServer = async () => {
   try {
@@ -70,6 +129,12 @@ const startServer = async () => {
       console.log(`服务器运行在 http://localhost:${port}`);
       console.log(`API 文档: http://localhost:${port}`);
     });
+
+    // 启动时执行一次更新
+    scheduleServerUpdate();
+
+    // 每隔24小时执行一次更新
+    setInterval(scheduleServerUpdate, 24 * 60 * 60 * 1000);
   } catch (error) {
     console.error('服务器启动失败:', error);
     process.exit(1);

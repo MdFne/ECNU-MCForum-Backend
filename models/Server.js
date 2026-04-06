@@ -32,6 +32,10 @@ const serverSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    currentPlayers: {
+        type: Number,
+        default: 0
+    },
     maxPlayers: {
         type: Number,
         default: 64
@@ -47,7 +51,69 @@ const serverSchema = new mongoose.Schema({
     updatedAt: {
         type: Date,
         default: Date.now
+    },
+    monthlyHeat: {
+        type: [Number],
+        default: []
+    },
+    last10dayHeat: {
+        type: [Number],
+        default: Array(10).fill(0)
+    },
+    requiredMods: {
+        type: [String],
+        default: []
+    },
+    version: {
+        type: String,
+        default: '1.20.1'
+    },
+    // 新增字段，与API响应格式对齐
+    last_updated_str: {
+        type: String,
+        default: ''
+    },
+    last_updated: {
+        type: Number,
+        default: 0
+    },
+    motd: {
+        type: String,
+        default: ''
+    },
+    ping: {
+        type: Number,
+        default: 0
+    },
+    today_max: {
+        type: Number,
+        default: 0
+    },
+    today_min: {
+        type: Number,
+        default: 0
+    },
+    today_avg: {
+        type: Number,
+        default: 0
+    },
+    history_max: {
+        type: Number,
+        default: 0
+    },
+    total_queries: {
+        type: Number,
+        default: 0
+    },
+    created_at: {
+        type: Number,
+        default: 0
+    },
+    created_at_str: {
+        type: String,
+        default: ''
     }
+
 });
 
 module.exports = mongoose.model('Server', serverSchema);
