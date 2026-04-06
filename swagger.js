@@ -14,12 +14,21 @@ const options = {
         url: 'http://localhost:3000',
         description: '开发环境'
       }
-    ]
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: '请输入JWT令牌'
+        }
+      }
+    }
   },
-  apis: ['./routes/*.js', './controllers/*.js'] // 扫描的文件
+  apis: ['./routes/*.js', './controllers/*.js']
 };
 
-// 生成 Swagger �档
 const swaggerSpec = swaggerJSDoc(options);
 
 const setupSwagger = (app) => {
