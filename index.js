@@ -70,9 +70,8 @@ const scheduleServerUpdate = async () => {
 
     for (const server of servers) {
       try {
-        // 提取ip地址（去除端口号）
-        const ip = server.address.split(':')[0];
-        const apiResponse = await fetch(`https://www.minecraftservers.cn/api/query?ip=${ip}`);
+        // 使用地址加端口的格式
+        const apiResponse = await fetch(`https://www.minecraftservers.cn/api/query?ip=${server.address}%3A${server.port}`);
 
         if (apiResponse.ok) {
           const apiData = await apiResponse.json();

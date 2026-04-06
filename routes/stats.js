@@ -92,7 +92,6 @@ router.get('/servers', statsController.getServers);
 router.get('/servers/:id/realtime', statsController.getServerRealTimeStats);
 
 
-
 // 服务器最近10天热度
 /**
  * @swagger
@@ -230,5 +229,7 @@ router.get('/overview', statsController.getOverviewStats);
  *         description: 服务器内部错误
  */
 router.put('/servers/:id', statsController.updateServer);
+
+router.post('/servers/refresh-all', statsController.refreshAllServersStats);
 
 module.exports = router;
