@@ -62,7 +62,9 @@ const getOverviewStats = asyncHandler(async (req, res) => {
 
     const totalServers = servers.length;
     const onlineServers = servers.filter(server => server.isActive).length;
-    const totalPlayers = servers.reduce((sum, server) => sum + (server.currentPlayers || 0), 0);
+    const totalPlayers = servers.reduce((sum, server) =>
+        sum + (server.currentPlayers === -1 ? 0 : server.currentPlayers)
+        , 0);
 
     const data = {
         totalServers,

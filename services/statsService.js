@@ -5,11 +5,11 @@ const MINECRAFT_API_BASE = 'https://www.minecraftservers.cn/api/query';
 
 async function fetchMinecraftServerStatus(address, port) {
     const response = await fetch(`${MINECRAFT_API_BASE}?ip=${address}%3A${port}`);
-    
+
     if (!response.ok) {
         return null;
     }
-    
+
     const data = await response.json();
     return data;
 }
@@ -23,10 +23,64 @@ function buildOfflineUpdateData() {
     };
 }
 
+// 解析MOTD，将title、version、type等提取出来
+function parseMotd(motd) {
+    if (!motd) return { title: null, version: null, type: null };
+
+    // 统一换行符（处理 \n 或 \\n）
+    const motdStr = motd.replace(/\\n/g, '\n');
+    const parts = motdStr.split('\n');
+    const firstLine = parts[0]?.trim() || '';
+    const secondLine = parts[1]?.trim() || '';
+
+    let title = null;
+    let version = null;
+    let type = null;
+
+    // ==================== 解析标题 ====================
+    if (firstLine) {
+        // 去掉末尾的 "MC" 字样（保留前面的服务器名）
+        title = firstLine.replace(/\s*MC\s*$/i, '').trim();
+    }
+
+    // ==================== 解析版本号 ====================
+    if (secondLine) {
+        // 匹配 1.21.7 / 1.20 / 1.20.4 这类版本号
+        const versionMatch = secondLine.match(/\b(\d+\.\d+(?:\.\d+)?)\b/);
+        if (versionMatch) {
+            version = versionMatch[1];
+        }
+    }
+
+    // ==================== 解析服务器类型 ====================
+    if (secondLine) {
+        const typePatterns = [
+            { pattern: /创造|创造模式|creative/i, value: '创造' },
+            { pattern: /生存|生存模式|survival/i, value: '生存' },
+            { pattern: /小游戏|minigame/i, value: '小游戏' },
+            { pattern: /测试|test/i, value: '测试' },
+            { pattern: /复刻|复原/i, value: '复刻' }
+        ];
+
+        for (const { pattern, value } of typePatterns) {
+            if (pattern.test(secondLine)) {
+                type = value;
+                break;
+            }
+        }
+    }
+
+    return { title, version, type };
+}
+
 function buildOnlineUpdateData(apiData, currentServer) {
     const last10dayHeat = [...(currentServer.last10dayHeat || Array(10).fill(0))];
     last10dayHeat.shift();
     last10dayHeat.push(apiData.data?.today_max || 0);
+
+    const motd = apiData.data?.motd || '';
+    const parsedMotd = parseMotd(motd);
+    console.log('解析后的MOTD:', parsedMotd);
 
     const updateData = {
         isActive: true,
@@ -34,7 +88,7 @@ function buildOnlineUpdateData(apiData, currentServer) {
         maxPlayers: apiData.data?.mp || currentServer.maxPlayers,
         last_updated_str: apiData.data?.last_updated_str || '',
         last_updated: apiData.data?.last_updated || 0,
-        motd: apiData.data?.motd || '',
+        motd: motd,
         ping: apiData.data?.ping || 0,
         today_max: apiData.data?.today_max || 0,
         today_min: apiData.data?.today_min || 0,
@@ -46,6 +100,16 @@ function buildOnlineUpdateData(apiData, currentServer) {
         last10dayHeat,
         updatedAt: new Date()
     };
+
+    if (parsedMotd.title) {
+        updateData.title = parsedMotd.title;
+    }
+    if (parsedMotd.version) {
+        updateData.version = parsedMotd.version;
+    }
+    if (parsedMotd.type) {
+        updateData.type = parsedMotd.type;
+    }
 
     if (apiData.data?.logo) {
         updateData.thumbnail = apiData.data.logo;
@@ -76,7 +140,7 @@ async function updateServerStatus(serverId, apiData) {
     }
 
     const updatedServer = await Server.findByIdAndUpdate(serverId, updateData, { new: true });
-    
+
     return { updatedServer, isOnline, apiData };
 }
 
@@ -91,7 +155,7 @@ async function refreshServerRealTime(serverId) {
     }
 
     const apiData = await fetchMinecraftServerStatus(server.address, server.port);
-    
+
     return updateServerStatus(serverId, apiData);
 }
 

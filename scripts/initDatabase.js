@@ -32,17 +32,20 @@ const initDatabase = async () => {
             {
                 name: 'server-3',
                 title: '服务器 3',
-                address: 'play.ecnumc.cn'
+                address: 'play.ecnumc.cn',
+                port: 30036
             },
             {
                 name: 'server-4',
                 title: '服务器 4',
-                address: 'mc.ecnu.edu.cn'
+                address: 'play.ecnumc.cn',
+                port: 30065
             },
             {
                 name: 'server-5',
                 title: '服务器 5',
-                address: 'minecraft.ecnu.edu.cn'
+                address: 'play.ecnumc.cn',
+                port: 30066
             }
         ];
 
