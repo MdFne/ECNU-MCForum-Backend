@@ -18,6 +18,7 @@ const { errorHandler, notFound } = require('./utils/errorHandler');
 // 引入路由模块
 const statsRoutes = require('./routes/stats');
 const authRoutes = require('./routes/auth');
+const carouselRoutes = require('./routes/carousel');
 
 // 解析 JSON 请求体
 app.use(express.json());
@@ -39,13 +40,15 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     endpoints: {
       auth: '/api/auth',
-      stats: '/api/stats'
+      stats: '/api/stats',
+      carousel: '/api/carousel'
     }
   });
 });
 
 app.use('/api/auth', authRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/carousel', carouselRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

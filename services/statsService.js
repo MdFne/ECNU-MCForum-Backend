@@ -33,9 +33,9 @@ function parseMotd(motd) {
     const firstLine = parts[0]?.trim() || '';
     const secondLine = parts[1]?.trim() || '';
 
-    let title = null;
-    let version = null;
-    let type = null;
+    let title = '未知服务器';
+    let version = '未知版本';
+    let type = '未知类型';
 
     // ==================== 解析标题 ====================
     if (firstLine) {
@@ -80,6 +80,7 @@ function buildOnlineUpdateData(apiData, currentServer) {
 
     const motd = apiData.data?.motd || '';
     const parsedMotd = parseMotd(motd);
+    console.log('原始MOTD:', motd);
     console.log('解析后的MOTD:', parsedMotd);
 
     const updateData = {

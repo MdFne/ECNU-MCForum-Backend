@@ -1,13 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const authenticate = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
+
+/**
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: 认证接口
+ */
 
 /**
  * @swagger
  * /api/auth/register:
  *   post:
  *     summary: 用户注册
+ *     tags: [Auth]
  *     description: 创建新用户账号，注册成功后返回JWT令牌
  *     requestBody:
  *       required: true
@@ -87,6 +95,7 @@ router.post('/register', authController.register);
  * @swagger
  * /api/auth/login:
  *   post:
+ *     tags: [Auth]
  *     summary: 用户登录
  *     description: 使用用户名或邮箱和密码登录，返回JWT令牌
  *     requestBody:
@@ -155,6 +164,7 @@ router.post('/login', authController.login);
  * @swagger
  * /api/auth/refresh:
  *   post:
+ *     tags: [Auth]
  *     summary: 刷新访问令牌
  *     description: 使用刷新令牌获取新的访问令牌
  *     requestBody:
@@ -204,6 +214,7 @@ router.post('/refresh', authController.refreshToken);
  * @swagger
  * /api/auth/logout:
  *   post:
+ *     tags: [Auth]
  *     summary: 用户退出登录
  *     description: 退出登录，使当前令牌失效
  *     security:
@@ -235,6 +246,7 @@ router.post('/logout', authenticate, authController.logout);
  * @swagger
  * /api/auth/me:
  *   get:
+ *     tags: [Auth]
  *     summary: 获取当前用户信息
  *     description: 获取已登录用户的详细信息
  *     security:

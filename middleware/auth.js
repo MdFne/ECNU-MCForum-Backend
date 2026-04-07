@@ -2,7 +2,7 @@
 const jwt = require('jsonwebtoken');
 const jwtConfig = require('../config/jwt');
 
-const authenticate = (req, res, next) => {
+const authenticate = async (req, res, next) => {
     // 从请求头获取 token
     const token = req.header('Authorization')?.replace('Bearer ', '');
 
@@ -21,4 +21,28 @@ const authenticate = (req, res, next) => {
     }
 };
 
-module.exports = authenticate;
+/**
+ * 角色授权中间件
+ * @param  {...string} roles 允许访问的角色
+ */
+const authorize = (...roles) => {
+    return async (req, res, next) => {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ message: '未授权访问' });
+        }
+
+        const User = require('../models/User');
+        const user = await User.findById(req.user.id);
+
+        if (!user || !roles.includes(user.role)) {
+            return res.status(403).json({ message: '您没有权限执行此操作' });
+        }
+
+        next();
+    };
+};
+
+module.exports = {
+    authenticate,
+    authorize
+};

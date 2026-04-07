@@ -3,11 +3,19 @@ const express = require('express');
 const router = express.Router();
 const statsController = require('../controllers/statsController');
 
+/**
+ * @swagger
+ * tags:
+ *   name: Stats
+ *   description: 统计信息接口
+ */
+
 // 服务器列表
 /**
  * @swagger
  * /api/stats/servers:
  *   get:
+ *     tags: [Stats]
  *     summary: 获取服务器列表
  *     description: 获取所有活跃的服务器列表
  *     responses:
@@ -41,6 +49,7 @@ router.get('/servers', statsController.getServers);
  * @swagger
  * /api/stats/servers/{id}/realtime:
  *   get:
+ *     tags: [Stats]
  *     summary: 获取服务器实时状态
  *     description: 获取指定服务器的实时在线状态、玩家数量等信息
  *     parameters:
@@ -96,6 +105,7 @@ router.get('/servers/:id/realtime', statsController.getServerRealTimeStats);
  * @swagger
  * /api/stats/servers/{id}/last10day-heat:
  *   get:
+ *     tags: [Stats]
  *     summary: 获取服务器最近10天热度
  *     description: 获取指定服务器的最近10天热度数据，用于绘制热度趋势图
  *     parameters:
@@ -137,6 +147,7 @@ router.get('/servers/:id/last10day-heat', statsController.getServerLast10DayHeat
  * @swagger
  * /api/stats/overview:
  *   get:
+ *     tags: [Stats]
  *     summary: 获取概览统计
  *     description: 获取整个系统的概览统计数据，包括总服务器数、在线服务器数、总玩家数等
  *     responses:
@@ -173,6 +184,7 @@ router.get('/overview', statsController.getOverviewStats);
  * @swagger
  * /api/stats/servers/{id}:
  *   put:
+ *     tags: [Stats]    
  *     summary: 更新服务器数据
  *     description: 根据API响应数据更新服务器信息
  *     parameters:
@@ -234,6 +246,7 @@ router.put('/servers/:id', statsController.updateServer);
  * @swagger
  * /api/stats/servers/refresh-all:
  *   post:
+ *     tags: [Stats]    
  *     summary: 刷新所有服务器状态
  *     description: 批量刷新所有服务器的在线状态、玩家数量、版本、延迟等实时数据
  *     responses:
