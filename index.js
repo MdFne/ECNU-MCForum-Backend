@@ -20,6 +20,7 @@ const statsRoutes = require('./routes/stats');
 const authRoutes = require('./routes/auth');
 const carouselRoutes = require('./routes/carousel');
 const postCardRoutes = require('./routes/postCard');
+const activityTrailerRoutes = require('./routes/activityTrailer');
 
 // 解析 JSON 请求体
 app.use(express.json());
@@ -43,7 +44,8 @@ app.get('/', (req, res) => {
       auth: '/api/auth',
       stats: '/api/stats',
       carousel: '/api/carousel',
-      postcard: '/api/postcard'
+      postcard: '/api/postcard',
+      activityTrailer: '/api/activity-trailers'
     }
   });
 });
@@ -52,6 +54,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/carousel', carouselRoutes);
 app.use('/api/postcard', postCardRoutes);
+app.use('/api/activity-trailers', activityTrailerRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
