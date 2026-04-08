@@ -19,6 +19,7 @@ const { errorHandler, notFound } = require('./utils/errorHandler');
 const statsRoutes = require('./routes/stats');
 const authRoutes = require('./routes/auth');
 const carouselRoutes = require('./routes/carousel');
+const postCardRoutes = require('./routes/postCard');
 
 // 解析 JSON 请求体
 app.use(express.json());
@@ -41,7 +42,8 @@ app.get('/', (req, res) => {
     endpoints: {
       auth: '/api/auth',
       stats: '/api/stats',
-      carousel: '/api/carousel'
+      carousel: '/api/carousel',
+      postcard: '/api/postcard'
     }
   });
 });
@@ -49,6 +51,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/carousel', carouselRoutes);
+app.use('/api/postcard', postCardRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

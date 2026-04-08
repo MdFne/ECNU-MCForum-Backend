@@ -76,21 +76,26 @@ const getOverviewStats = asyncHandler(async (req, res) => {
 });
 
 const updateServer = asyncHandler(async (req, res) => {
-    const { id } = req.params;
+    const { serverId } = req.params;
     const updateData = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(serverId)) {
         throw new BadRequestError('无效的服务器ID');
     }
 
-    const server = await Server.findById(id);
+    const server = await Server.findById(serverId);
 
     if (!server) {
         throw new NotFoundError('服务器不存在');
     }
 
+    // 兼容性处理：如果传入了 ip 但没有传入 address，则将 ip 赋值给 address
+    if (updateData.ip && !updateData.address) {
+        updateData.address = updateData.ip;
+    }
+
     const updatedServer = await Server.findByIdAndUpdate(
-        id,
+        serverId,
         { ...updateData, updatedAt: new Date() },
         { new: true, runValidators: true }
     );

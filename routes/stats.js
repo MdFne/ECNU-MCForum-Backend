@@ -182,14 +182,14 @@ router.get('/overview', statsController.getOverviewStats);
 // 更新服务器数据
 /**
  * @swagger
- * /api/stats/servers/{id}:
+ * /api/stats/servers/{serverId}:
  *   put:
  *     tags: [Stats]    
  *     summary: 更新服务器数据
- *     description: 根据API响应数据更新服务器信息
+ *     description: 更新指定服务器的所有信息（包括基本信息和实时状态数据）
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: serverId
  *         required: true
  *         schema:
  *           type: string
@@ -201,17 +201,52 @@ router.get('/overview', statsController.getOverviewStats);
  *           schema:
  *             type: object
  *             properties:
+ *               name:
+ *                 type: string
+ *                 description: 服务器名称（唯一标识）
+ *               title:
+ *                 type: string
+ *                 description: 服务器标题（显示名称）
+ *               address:
+ *                 type: string
+ *                 description: 服务器IP或域名
+ *               ip:
+ *                 type: string
+ *                 description: 服务器IP（与address效果相同，兼容性考虑）
+ *               port:
+ *                 type: number
+ *                 description: 服务器端口
+ *               type:
+ *                 type: string
+ *                 enum: ['生存', '创造', '小游戏', '测试', '其他']
+ *                 description: 服务器类型
+ *               description:
+ *                 type: string
+ *                 description: 服务器描述
+ *               version:
+ *                 type: string
+ *                 description: 游戏版本
  *               currentPlayers:
  *                 type: number
+ *                 description: 当前在线玩家数
  *               maxPlayers:
  *                 type: number
+ *                 description: 最大玩家数
+ *               isActive:
+ *                 type: boolean
+ *                 description: 服务器是否活跃
+ *               thumbnail:
+ *                 type: string
+ *                 description: 服务器Logo/缩略图URL
+ *               motd:
+ *                 type: string
+ *                 description: 服务器MOTD信息
+ *               ping:
+ *                 type: number
+ *                 description: 延迟(ms)
  *               last_updated_str:
  *                 type: string
  *               last_updated:
- *                 type: number
- *               motd:
- *                 type: string
- *               ping:
  *                 type: number
  *               today_max:
  *                 type: number
@@ -227,8 +262,6 @@ router.get('/overview', statsController.getOverviewStats);
  *                 type: number
  *               created_at_str:
  *                 type: string
- *               thumbnail:
- *                 type: string
  *     responses:
  *       200:
  *         description: 成功更新服务器数据
@@ -239,7 +272,7 @@ router.get('/overview', statsController.getOverviewStats);
  *       500:
  *         description: 服务器内部错误
  */
-router.put('/servers/:id', statsController.updateServer);
+router.put('/servers/:serverId', statsController.updateServer);
 
 // 刷新所有服务器状态
 /**
