@@ -1,25 +1,33 @@
 // middleware/auth.js
 const jwt = require('jsonwebtoken');
 const jwtConfig = require('../config/jwt');
+const { UnauthorizedError, asyncHandler } = require('../utils/errorHandler');
+const User = require('../models/User');
 
-const authenticate = async (req, res, next) => {
+const authenticate = asyncHandler(async (req, res, next) => {
     // 从请求头获取 token
     const token = req.header('Authorization')?.replace('Bearer ', '');
 
     if (!token) {
-        return res.status(401).json({ message: 'Access denied. No token provided.' });
+        throw new UnauthorizedError('请先登录');
     }
 
-    try {
-        // 验证 token
-        const decoded = jwt.verify(token, jwtConfig.secret);
-        // 将用户信息存储到请求对象
-        req.user = decoded;
-        next();
-    } catch (error) {
-        return res.status(400).json({ message: 'Invalid token.' });
+    // 验证 token
+    const decoded = jwt.verify(token, jwtConfig.secret);
+
+    // 检查用户是否仍然存在且未被禁用
+    const user = await User.findById(decoded.id);
+    if (!user) {
+        throw new UnauthorizedError('用户不存在');
     }
-};
+    if (!user.isActive) {
+        throw new UnauthorizedError('账号已被禁用');
+    }
+
+    // 将用户信息存储到请求对象
+    req.user = decoded;
+    next();
+});
 
 /**
  * 角色授权中间件

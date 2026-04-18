@@ -6,6 +6,15 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 // 引入 Swagger 配置
 const setupSwagger = require('./swagger.js');
+// 引入 http 模块和 Socket.IO
+const http = require('http');
+const { Server: SocketIOServer } = require('socket.io');
+// 引入 Socket 聊天事件处理
+const chatHandler = require('./socket/chatHandler');
+// 引入 JWT 验证
+const jwt = require('jsonwebtoken');
+const jwtConfig = require('./config/jwt');
+const User = require('./models/User');
 
 // 创建应用实例
 const app = express();
@@ -21,6 +30,7 @@ const authRoutes = require('./routes/auth');
 const carouselRoutes = require('./routes/carousel');
 const postCardRoutes = require('./routes/postCard');
 const activityTrailerRoutes = require('./routes/activityTrailer');
+const chatRoutes = require('./routes/chat');
 
 // 解析 JSON 请求体
 app.use(express.json());
@@ -45,7 +55,8 @@ app.get('/', (req, res) => {
       stats: '/api/stats',
       carousel: '/api/carousel',
       postcard: '/api/postcard',
-      activityTrailer: '/api/activity-trailers'
+      activityTrailer: '/api/activity-trailers',
+      chat: '/api/chat'
     }
   });
 });
@@ -55,6 +66,7 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/carousel', carouselRoutes);
 app.use('/api/postcard', postCardRoutes);
 app.use('/api/activity-trailers', activityTrailerRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
@@ -133,9 +145,49 @@ const scheduleServerUpdate = async () => {
 const startServer = async () => {
   try {
     await connectDB();
-    app.listen(port, () => {
+
+    // 创建 HTTP Server（替代 app.listen）
+    const httpServer = http.createServer(app);
+
+    // 创建 Socket.IO 实例
+    const io = new SocketIOServer(httpServer, {
+      cors: {
+        origin: 'http://localhost:5173',
+        methods: ['GET', 'POST']
+      }
+    });
+
+    // Socket.IO 认证中间件
+    io.use(async (socket, next) => {
+      const token = socket.handshake.auth.token;
+      if (!token) {
+        return next(new Error('请先登录'));
+      }
+      try {
+        const decoded = jwt.verify(token, jwtConfig.secret);
+        const user = await User.findById(decoded.id);
+        if (!user || !user.isActive) {
+          return next(new Error('用户不存在或已被禁用'));
+        }
+        // 将用户信息挂载到 socket 上，供事件处理器使用
+        socket.user = {
+          id: user._id,
+          username: user.username,
+          avatar: user.avatar
+        };
+        next();
+      } catch (error) {
+        next(new Error('认证失败'));
+      }
+    });
+
+    // 注册聊天事件处理
+    chatHandler(io);
+
+    httpServer.listen(port, () => {
       console.log(`服务器运行在 http://localhost:${port}`);
-      console.log(`API 文档: http://localhost:${port}`);
+      console.log(`API 文档: http://localhost:${port}/api-docs`);
+      console.log(`Socket.IO 已启用`);
     });
 
     // 启动时执行一次更新
