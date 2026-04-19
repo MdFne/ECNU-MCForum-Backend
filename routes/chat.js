@@ -50,7 +50,7 @@ router.get('/channels', chatController.getChannels);
  *       200:
  *         description: 获取消息成功
  */
-router.get('/channels/:channelId/messages', authenticate, chatController.getMessages);
+router.get('/channels/:channelId/messages', chatController.getMessages);
 
 /**
  * @swagger

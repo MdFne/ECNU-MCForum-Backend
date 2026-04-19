@@ -32,7 +32,8 @@ const messageSchema = new mongoose.Schema({
         default: null
     }
 }, {
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true }
 });
 
 // 按 channel + createdAt 建复合索引，加速历史消息查询

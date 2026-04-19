@@ -31,9 +31,13 @@ const carouselRoutes = require('./routes/carousel');
 const postCardRoutes = require('./routes/postCard');
 const activityTrailerRoutes = require('./routes/activityTrailer');
 const chatRoutes = require('./routes/chat');
+const userRoutes = require('./routes/user');
 
 // 解析 JSON 请求体
 app.use(express.json());
+
+// 静态文件服务：提供用户上传的头像等文件访问
+app.use('/uploads', express.static('uploads'));
 
 // 配置 Swagger
 setupSwagger(app);
@@ -56,7 +60,8 @@ app.get('/', (req, res) => {
       carousel: '/api/carousel',
       postcard: '/api/postcard',
       activityTrailer: '/api/activity-trailers',
-      chat: '/api/chat'
+      chat: '/api/chat',
+      users: '/api/users'
     }
   });
 });
@@ -67,6 +72,7 @@ app.use('/api/carousel', carouselRoutes);
 app.use('/api/postcard', postCardRoutes);
 app.use('/api/activity-trailers', activityTrailerRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/users', userRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
