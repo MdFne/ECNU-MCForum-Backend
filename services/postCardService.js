@@ -57,7 +57,7 @@ class PostCardService {
         sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
         const [postcards, total] = await Promise.all([
-            Postcard.find(filter)
+            Postcard.find(filter, '-content')
                 .sort(sort)
                 .skip(skip)
                 .limit(parseInt(limit)),
