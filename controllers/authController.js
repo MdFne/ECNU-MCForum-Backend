@@ -4,6 +4,8 @@ const jwtConfig = require('../config/jwt');
 const ApiResponse = require('../utils/response');
 const { BadRequestError, UnauthorizedError, ConflictError, NotFoundError, asyncHandler } = require('../utils/errorHandler');
 const User = require('../models/User');
+const { generateCode, storeCode, verifyCode, canResend } = require('../utils/verificationCode');
+const { sendRegisterCode, sendResetCode } = require('../services/emailService');
 
 const SALT_ROUNDS = 10;
 
@@ -24,10 +26,19 @@ const generateRefreshToken = (userId) => {
 };
 
 const register = asyncHandler(async (req, res) => {
-    const { username, email, password, confirmPassword } = req.body;
+    const { username, email, password, confirmPassword, code } = req.body;
 
     if (!username || !email || !password) {
         throw new BadRequestError('用户名、邮箱和密码不能为空');
+    }
+
+    if (!code) {
+        throw new BadRequestError('验证码不能为空');
+    }
+
+    // 校验邮箱验证码
+    if (!verifyCode(email, code, 'register')) {
+        throw new BadRequestError('验证码无效或已过期');
     }
 
     if (password !== confirmPassword) {
@@ -193,6 +204,87 @@ const logout = asyncHandler(async (req, res) => {
     return ApiResponse.success(res, null, '退出登录成功');
 });
 
+// 发送注册验证码
+const sendRegisterCodeHandler = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        throw new BadRequestError('邮箱不能为空');
+    }
+
+    // 检查邮箱是否已注册
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+        throw new ConflictError('该邮箱已被注册');
+    }
+
+    // 检查冷却期
+    if (!canResend(email, 'register')) {
+        throw new BadRequestError('请求过于频繁，请60秒后重试');
+    }
+
+    const code = generateCode();
+    storeCode(email, code, 'register');
+    await sendRegisterCode(email, code);
+
+    return ApiResponse.success(res, null, '验证码已发送');
+});
+
+// 发送重置密码验证码
+const sendResetCodeHandler = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        throw new BadRequestError('邮箱不能为空');
+    }
+
+    // 检查邮箱是否存在对应用户
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+        throw new NotFoundError('该邮箱未注册');
+    }
+
+    // 检查冷却期
+    if (!canResend(email, 'reset')) {
+        throw new BadRequestError('请求过于频繁，请60秒后重试');
+    }
+
+    const code = generateCode();
+    storeCode(email, code, 'reset');
+    await sendResetCode(email, code);
+
+    return ApiResponse.success(res, null, '验证码已发送');
+});
+
+// 重置密码
+const resetPassword = asyncHandler(async (req, res) => {
+    const { email, code, newPassword } = req.body;
+
+    if (!email || !code || !newPassword) {
+        throw new BadRequestError('邮箱、验证码和新密码不能为空');
+    }
+
+    if (newPassword.length < 6) {
+        throw new BadRequestError('密码长度至少6位');
+    }
+
+    // 校验验证码
+    if (!verifyCode(email, code, 'reset')) {
+        throw new BadRequestError('验证码无效或已过期');
+    }
+
+    // 查找用户并更新密码
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    if (!user) {
+        throw new NotFoundError('用户不存在');
+    }
+
+    user.password = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await user.save();
+
+    return ApiResponse.success(res, null, '密码重置成功');
+});
+
 module.exports = {
     register,
     login,
@@ -200,5 +292,8 @@ module.exports = {
     refreshToken,
     logout,
     generateToken,
-    generateRefreshToken
+    generateRefreshToken,
+    sendRegisterCode: sendRegisterCodeHandler,
+    sendResetCode: sendResetCodeHandler,
+    resetPassword
 };

@@ -297,4 +297,94 @@ router.post('/logout', authenticate, authController.logout);
  */
 router.get('/me', authenticate, authController.getProfile);
 
+/**
+ * @swagger
+ * /api/auth/send-register-code:
+ *   post:
+ *     tags: [Auth]
+ *     summary: 发送注册验证码
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: 验证码已发送
+ *       400:
+ *         description: 请求过于频繁
+ *       409:
+ *         description: 邮箱已被注册
+ */
+router.post('/send-register-code', authController.sendRegisterCode);
+
+/**
+ * @swagger
+ * /api/auth/send-reset-code:
+ *   post:
+ *     tags: [Auth]
+ *     summary: 发送重置密码验证码
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: 验证码已发送
+ *       400:
+ *         description: 请求过于频繁
+ *       404:
+ *         description: 邮箱未注册
+ */
+router.post('/send-reset-code', authController.sendResetCode);
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     tags: [Auth]
+ *     summary: 重置密码
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - code
+ *               - newPassword
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               code:
+ *                 type: string
+ *                 description: 邮箱验证码
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: 密码重置成功
+ *       400:
+ *         description: 验证码无效或已过期
+ */
+router.post('/reset-password', authController.resetPassword);
+
 module.exports = router;

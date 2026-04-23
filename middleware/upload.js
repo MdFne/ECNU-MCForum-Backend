@@ -1,12 +1,19 @@
 // 文件上传中间件配置
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+
+const uploadDir = 'uploads/avatars/';
+// 确保上传目录存在
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // 存储配置
 const storage = multer.diskStorage({
   // 存储目录
   destination: function (req, file, cb) {
-    cb(null, 'uploads/avatars/');
+    cb(null, uploadDir);
   },
   // 文件名：用户id_时间戳.扩展名
   filename: function (req, file, cb) {
