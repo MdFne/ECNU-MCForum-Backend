@@ -77,6 +77,17 @@ router.get('/', postCardController.getAllPostcards);
 
 /**
  * @swagger
+ * /api/postcard/tags:
+ *   get:
+ *     summary: 获取所有不重复标签
+ *     tags: [Postcard]
+ *     responses:
+ *       200: { description: 获取成功 }
+ */
+router.get('/tags', postCardController.getAllTags);
+
+/**
+ * @swagger
  * /api/postcard/{id}:
  *   get:
  *     summary: 获取单篇文章详情

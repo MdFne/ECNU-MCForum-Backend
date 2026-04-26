@@ -110,6 +110,14 @@ class PostCardService {
     async deletePostcard(id) {
         return await Postcard.findByIdAndDelete(id);
     }
+
+    /**
+     * 获取所有不重复的标签
+     * @returns {Promise<Array<string>>}
+     */
+    async getDistinctTags() {
+        return await Postcard.distinct('tags', { isActive: true });
+    }
 }
 
 module.exports = new PostCardService();

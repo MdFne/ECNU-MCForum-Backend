@@ -84,9 +84,18 @@ const deletePostcard = asyncHandler(async (req, res) => {
     return ApiResponse.success(res, null, '文章删除成功');
 });
 
+/**
+ * 获取所有不重复标签
+ */
+const getAllTags = asyncHandler(async (req, res) => {
+    const tags = await postCardService.getDistinctTags();
+    return ApiResponse.success(res, tags, '获取标签列表成功');
+});
+
 module.exports = {
     createPostcard,
     getAllPostcards,
+    getAllTags,
     getPostcardById,
     updatePostcard,
     deletePostcard
