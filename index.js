@@ -32,6 +32,7 @@ const postCardRoutes = require('./routes/postCard');
 const activityTrailerRoutes = require('./routes/activityTrailer');
 const chatRoutes = require('./routes/chat');
 const userRoutes = require('./routes/user');
+const commentRoutes = require('./routes/comment');
 
 // 解析 JSON 请求体
 app.use(express.json());
@@ -61,7 +62,8 @@ app.get('/', (req, res) => {
       postcard: '/api/postcard',
       activityTrailer: '/api/activity-trailers',
       chat: '/api/chat',
-      users: '/api/users'
+      users: '/api/users',
+      comments: '/api/comments'
     }
   });
 });
@@ -73,6 +75,7 @@ app.use('/api/postcard', postCardRoutes);
 app.use('/api/activity-trailers', activityTrailerRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api', commentRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
